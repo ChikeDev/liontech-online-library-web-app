@@ -1,0 +1,48 @@
+pipeline{
+    agent any
+
+    tools{
+        maven "maven3.9.2"
+    }
+
+    stages {
+        stage("CloneFromSourceCode"){
+            steps{
+                sh "echo 'clone source code from Githubs'"
+                git url: 'https://github.com/ChikeDev/liontech-online-library-web-app.git'
+            }
+        }
+        stage ("Test-Build-Package"){
+            steps{
+                sh "echo 'Building APP with Maven'"
+                sh "mvn install"
+                sh "mvn validate"
+                sh "mvn test"
+                sh "mvn clean package"
+            }
+        }
+        stage ("codequality"){
+            steps{
+                sh "echo 'Performing Code Quality Analyses 2"
+                sh "mvn sonar:sonar"
+            }
+        }
+        stage ("Upload to Nexus"){
+            steps{
+                sh "mvn deploy"
+            }
+        }
+        stage("deploy to Tomcat"){
+            steps{
+                sh "deploy adapters: [tomcat9(credentialsId: 'jenkins-tomcat deployment', path: '', url: 'http://54.91.85.79:8009/')], contextPath: 'chike-deployer', war: 'target/*.war'"
+            }
+        }
+
+
+        
+    }
+
+
+
+
+}
