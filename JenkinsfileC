@@ -23,13 +23,18 @@ pipeline{
         }
         stage ("codequality"){
             steps{
-                sh "echo 'Performing Code Quality Analysis"
+                sh "echo 'Performing Code Quality Analyses"
                 sh "mvn sonar:sonar"
             }
         }
         stage ("Upload to Nexus"){
             steps{
                 sh "mvn deploy"
+            }
+        }
+        stage("deploy to Tomcat"){
+            steps{
+                sh "deploy adapters: [tomcat9(credentialsId: 'jenkins-tomcat deployment', path: '', url: 'http://54.91.85.79:8009/')], contextPath: 'chike-deployer', war: 'target/*.war'"
             }
         }
 
